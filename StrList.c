@@ -72,6 +72,5 @@ size_t StrList_size(const StrList* strList) {
 void StrList_insertLast(StrList* StrList, const char* data){
     if(StrList != NULL){
         Node* p_nodeStrList = StrList -> _pHead;
-
     }
 }
