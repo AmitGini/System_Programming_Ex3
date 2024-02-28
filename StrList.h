@@ -1,3 +1,5 @@
+#ifndef STRLIST_H
+#define STRLIST_H
 #pragma once
 
 #include <stdlib.h>
@@ -111,3 +113,4 @@ void StrList_sort( StrList* StrList);
  */
 int StrList_isSorted(StrList* StrList);
 
+#endif
