@@ -7,6 +7,8 @@
 #define TRUE 1
 #define FALSE 0
 
+
+
 // Node & StrList Data Structures
 typedef struct Node {
     char *_data;
@@ -19,6 +21,8 @@ struct _StrList {
 };
 
 void free_Node(Node *Node);
+Node *Node_alloc(const char *data, Node *next);
+
 
 // Allocation memory for node and data
 Node *Node_alloc(const char *data, Node *next) {
@@ -27,20 +31,18 @@ Node *Node_alloc(const char *data, Node *next) {
         return NULL;
     }
 
-    Node *ptrNode = (Node*)malloc(sizeof(Node)); // Memory allocation for the node
+    Node *ptrNode = (Node*)calloc(1,sizeof(Node)); // Memory allocation for the node
 
     if (ptrNode == NULL) {// Check Failure to allocate memory
         fprintf(stderr, "Error, Allocation memory for new node failed\n");
-        free(ptrNode);
         return NULL;
     }
 
-    char* ptrData = (char*)malloc(strlen(data) + 1);  // Memory allocation for the data field of node
+    char* ptrData = (char*)calloc(1,strlen(data) + 1);  // Memory allocation for the data field of node
 
     if(ptrData == NULL){
         fprintf(stderr, "Error allocating memory for node data\n" );
         free_Node(ptrNode);  // node and data field being freed in free_Node function
-        free(ptrData);  // safety for freeing pointer for data memory
         return NULL;
     }
 
@@ -51,18 +53,18 @@ Node *Node_alloc(const char *data, Node *next) {
 }
 
 //Free the memory that been allocated for the node and for the data
-void free_Node(Node *node){
-    if(node != NULL)
-        free(node -> _data);
-    free(node);
+void free_Node(Node* node) {
+    if (node != NULL) {
+        free(node->_data); // Free the data
+        free(node); // Then free the node
+    }
 }
 
 StrList* StrList_alloc(){
-    StrList *ptrStrList = (StrList*)malloc(sizeof(StrList));
+    StrList *ptrStrList = (StrList*)calloc(1,sizeof(StrList));
 
     if(ptrStrList == NULL){
         fprintf(stderr, "Error allocation memory for string list\n");
-        free(ptrStrList);
         return NULL;
     }
 
@@ -71,19 +73,18 @@ StrList* StrList_alloc(){
     return ptrStrList;
 }
 
-//todo: need to be tested
-void StrList_free(StrList* strList){
-    if (strList != NULL) {
-        Node *ptrNode = strList->_head;
-        Node *ptrTempNode;
-
-        while (ptrNode != NULL) {
-            ptrTempNode = ptrNode;
-            ptrNode = ptrNode->_next;
-            free_Node(ptrTempNode);
+void StrList_free(StrList* StrList) {
+    if (StrList != NULL) {
+        Node* current = StrList->_head;
+        while (current != NULL) {
+            Node* next = current->_next;
+            free_Node(current); // Assumes free_Node frees the node and its data
+            current = next;
         }
+        free(StrList); // Don't forget to free the list structure itself
     }
 }
+
 
 size_t StrList_size(const StrList* StrList) {
     return StrList -> _size;
@@ -328,32 +329,21 @@ int StrList_isEqual(const StrList* StrList1, const StrList* StrList2){
 }
 
 StrList* StrList_clone(const StrList* StrList){
-    if(StrList == NULL) return NULL;
-    struct _StrList *newList;
-    newList = StrList_alloc();
+    if (StrList == NULL) return NULL;
 
-    if(newList == NULL) free(newList);
+    struct _StrList* newList = StrList_alloc();
+    if (newList == NULL) return NULL; // Allocation failed, return NULL immediately.
 
-    size_t sizeStrList = StrList->_size;
     Node* tempNode = StrList->_head;
-
-    if(tempNode == NULL) return newList;
-
-    char* tempData = tempNode->_data;;
-    StrList_insertLast(newList,tempData);
-
-    for(int i = 1; i < sizeStrList; i++){
-        tempNode = tempNode -> _next;
-
-        if(tempNode == NULL){
-            StrList_free(newList);
-            free(newList);
-            return NULL;
-        }
-
-        tempData = tempNode->_data;
-        StrList_insertLast(newList,tempData);
-        newList->_size++;
+    while (tempNode != NULL) {
+        // StrList_insertLast makes a deep copy of the data.
+        StrList_insertLast(newList, tempNode->_data);
+        tempNode = tempNode->_next;
+    }
+    if (newList->_size != StrList->_size) {
+        // Handle insertion failure - case one of the allocation failed, size won't increase
+        StrList_free(newList);
+        return NULL;
     }
     return newList;
 }
@@ -407,6 +397,5 @@ int StrList_isSorted(StrList* StrList){
     StrList_sort(clonedList);
     isSorted = StrList_isEqual(StrList,clonedList);
     StrList_free(clonedList);
-    free(clonedList);
     return isSorted;
 }

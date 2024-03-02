@@ -27,4 +27,4 @@ StrList.o: StrList.c StrList.h
 
 # Clean up build artifacts
 clean:
-	rm -f $(TARGET) *.o *.a
+	rm -f *.o *.a StrList
