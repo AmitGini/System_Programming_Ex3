@@ -42,13 +42,13 @@ size_t StrList_size(const StrList* StrList);
  * Inserts an element in the end of the StrList.
  */
 void StrList_insertLast(StrList* StrList,
-					  const char* data);
+                        const char* data);
 
 /*
 * Inserts an element at given index
 */
 void StrList_insertAt(StrList* StrList,
-	const char* data,int index);
+                      const char* data,int index);
 
 /*
  * Returns the StrList first data.
@@ -76,7 +76,7 @@ Given a string, return the number of times it exists in the list.
 int StrList_count(StrList* StrList, const char* data);
 
 /*
-	Given a string and a list, remove all the appearances of this string in the list.
+	Given a string and a list, remove all the appearences of this string in the list.
 */
 void StrList_remove(StrList* StrList, const char* data);
 
@@ -92,13 +92,13 @@ void StrList_removeAt(StrList* StrList, int index);
 int StrList_isEqual(const StrList* StrList1, const StrList* StrList2);
 
 /*
- * Clones the given StrList. 
+ * Clones the given StrList.
  * It's the user responsibility to free it with StrList_free.
  */
 StrList* StrList_clone(const StrList* StrList);
 
 /*
- * Reveres the given StrList.
+ * Reverces the given StrList.
  */
 void StrList_reverse( StrList* StrList);
 

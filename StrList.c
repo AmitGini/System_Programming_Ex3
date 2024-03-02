@@ -85,8 +85,8 @@ void StrList_free(StrList* strList){
     }
 }
 
-size_t StrList_size(const StrList* strList) {
-    return strList -> _size;
+size_t StrList_size(const StrList* StrList) {
+    return StrList -> _size;
 }
 
 void StrList_insertLast(StrList* StrList, const char* data) {
