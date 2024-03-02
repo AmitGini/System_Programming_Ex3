@@ -76,7 +76,7 @@ Given a string, return the number of times it exists in the list.
 int StrList_count(StrList* StrList, const char* data);
 
 /*
-	Given a string and a list, remove all the appearences of this string in the list.
+	Given a string and a list, remove all the appearances of this string in the list.
 */
 void StrList_remove(StrList* StrList, const char* data);
 
@@ -98,7 +98,7 @@ int StrList_isEqual(const StrList* StrList1, const StrList* StrList2);
 StrList* StrList_clone(const StrList* StrList);
 
 /*
- * Reverces the given StrList. 
+ * Reveres the given StrList.
  */
 void StrList_reverse( StrList* StrList);
 

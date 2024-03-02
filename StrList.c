@@ -4,6 +4,9 @@
 #include <string.h>
 #include <limits.h>
 
+#define TRUE 1
+#define FALSE 0
+
 // Node & StrList Data Structures
 typedef struct Node {
     char *_data;
@@ -17,7 +20,7 @@ struct _StrList {
 
 void free_Node(Node *Node);
 
-// Allocation for the node and its data
+// Allocation memory for node and data
 Node *Node_alloc(const char *data, Node *next) {
     if(data == NULL){
         fprintf(stderr, "Error, Data is NULL\n");
@@ -36,7 +39,8 @@ Node *Node_alloc(const char *data, Node *next) {
 
     if(ptrData == NULL){
         fprintf(stderr, "Error allocating memory for node data\n" );
-        free_Node(ptrNode);  // node and data field of node freed
+        free_Node(ptrNode);  // node and data field being freed in free_Node function
+        free(ptrData);  // safety for freeing pointer for data memory
         return NULL;
     }
 
@@ -46,8 +50,7 @@ Node *Node_alloc(const char *data, Node *next) {
     return ptrNode;
 }
 
-//Free the memory that been allocated for the node
-//todo: need to be tested
+//Free the memory that been allocated for the node and for the data
 void free_Node(Node *node){
     if(node != NULL)
         free(node -> _data);
@@ -106,15 +109,17 @@ void StrList_insertLast(StrList* StrList, const char* data) {
 
 void StrList_insertAt(StrList* StrList, const char* data, int index) {
     if(StrList == NULL) return;
-
-    size_t sizeStrList = StrList -> _size;
-    if (index < 0 || index > sizeStrList) return;
-
-    if(data == NULL || strlen(data) < 1) return;
+    if (index < 0 || index > StrList -> _size) return;
+    if(data == NULL) return;
+    if(strlen(data) < 1) return;
 
     Node* ptrNewNode = Node_alloc(data, NULL);
 
-    if(ptrNewNode == NULL) return;   // Case 1: Node_allocation failed, Null exception handled in the alloc_Node function
+    if(ptrNewNode == NULL) {
+        free(ptrNewNode);
+        return;
+    }
+
 
     Node* ptrNode = StrList -> _head;
     Node* ptrPrevNode = ptrNode;
@@ -137,25 +142,27 @@ void StrList_insertAt(StrList* StrList, const char* data, int index) {
 }
 
 char* StrList_firstData(const StrList* StrList){
-    if(StrList == NULL) return NULL;
-    if(StrList->_head == NULL) return NULL;
-    return StrList -> _head -> _data;
+    if(StrList == NULL) {return NULL;}
+    else if(StrList->_head == NULL) {return NULL;}
+    else return StrList -> _head -> _data;
 }
 
 void StrList_print(const StrList* StrList){
-    if(StrList == NULL) return;
-    if (StrList -> _size == 0) return;
+    if(StrList == NULL) {printf("\n");}
+    else if (StrList -> _head == NULL) {printf("\n");}
 
-    Node* ptrNode = StrList -> _head;
-    char* ptrData;
+    else{
+        Node* ptrNode = StrList -> _head;
+        char* ptrData;
 
-    while(ptrNode-> _next != NULL){
+        while(ptrNode-> _next != NULL){
+            ptrData = ptrNode -> _data;
+            printf("%s ",  ptrData);
+            ptrNode = ptrNode -> _next;
+        }
         ptrData = ptrNode -> _data;
-        printf("%s ",  ptrData);
-        ptrNode = ptrNode -> _next;
+        printf("%s\n", ptrData);  // last word will be printed a bit different
     }
-    ptrData = ptrNode -> _data;
-    printf("%s\n", ptrData);  // last word will be printed a bit different
 }
 
 //todo: check in the original file, correctness of the arguments in the functions at file h
@@ -242,7 +249,7 @@ void StrList_remove(StrList* StrList, const char* data){
 
     if(ptrNode == NULL) return;
 
-    while(ptrNode -> _next != NULL) {
+    while(ptrNode != NULL) {
         dataAtNode = ptrNode->_data;
 
         if ((strlen(dataAtNode) == sizeData) && (strcmp(dataAtNode,data) == 0)) {
@@ -291,15 +298,15 @@ void StrList_removeAt(StrList* StrList, int index){
 }
 
 int StrList_isEqual(const StrList* StrList1, const StrList* StrList2){
-    if(StrList1 == NULL || StrList2 == NULL) return 0;
+    if(StrList1 == NULL || StrList2 == NULL) return TRUE;
 
     size_t sizeStrList1 = StrList1 -> _size;
     size_t sizeStrList2 = StrList1 -> _size;
-    if (sizeStrList1 != sizeStrList2) return 0;
+    if (sizeStrList1 != sizeStrList2) return FALSE;
 
     Node* nodeStrList1 = StrList1->_head;
     Node* nodeStrList2 = StrList2->_head;
-    if(nodeStrList1 == NULL) return 1;  // we checked both list have the same size, so if head is null, list2 head is null
+    if(nodeStrList1 == NULL || nodeStrList2 == NULL) return TRUE;  // we checked both list have the same size, so if head is null, list2 head is null
 
     char* dataNode1;
     char* dataNode2;
@@ -311,17 +318,45 @@ int StrList_isEqual(const StrList* StrList1, const StrList* StrList2){
         dataNode2=nodeStrList2->_data;
         sizeDataNode1=strlen(dataNode1);
         sizeDataNode2= strlen(dataNode2);
-        if(sizeDataNode1 != sizeDataNode2) return 0;
-        if(strcmp(dataNode1,dataNode2) != 0) return 0;
+        if(sizeDataNode1 != sizeDataNode2) return FALSE;
+        if(strcmp(dataNode1,dataNode2) != 0) return FALSE;
         nodeStrList1 = nodeStrList1->_next;
         nodeStrList2 = nodeStrList2->_next;
     }
-    return 1;
+
+    return TRUE;
 }
 
-//StrList* StrList_clone(const StrList* StrList){
-//    return StrList;
-//}
+StrList* StrList_clone(const StrList* StrList){
+    if(StrList == NULL) return NULL;
+    struct _StrList *newList;
+    newList = StrList_alloc();
+
+    if(newList == NULL) free(newList);
+
+    size_t sizeStrList = StrList->_size;
+    Node* tempNode = StrList->_head;
+
+    if(tempNode == NULL) return newList;
+
+    char* tempData = tempNode->_data;;
+    StrList_insertLast(newList,tempData);
+
+    for(int i = 1; i < sizeStrList; i++){
+        tempNode = tempNode -> _next;
+
+        if(tempNode == NULL){
+            StrList_free(newList);
+            free(newList);
+            return NULL;
+        }
+
+        tempData = tempNode->_data;
+        StrList_insertLast(newList,tempData);
+        newList->_size++;
+    }
+    return newList;
+}
 
 void StrList_reverse( StrList* StrList){
     if(StrList == NULL) return;
@@ -333,6 +368,45 @@ void StrList_reverse( StrList* StrList){
     }
 }
 
-//void StrList_sort( StrList* StrList);
-//
-//int StrList_isSorted(StrList* StrList);
+void StrList_sort( StrList* StrList){
+    if (StrList == NULL || StrList->_head == NULL || StrList->_head->_next == NULL) {
+        // The list is empty, has one element only, or the input is NULL.
+        return;
+    }
+
+    int swapped;
+    Node *current;
+    Node *lastPtr = NULL;
+
+    /* Looping until no swaps are needed; then, the list is sorted */
+    do {
+        swapped = 0;
+        current = StrList->_head;
+
+        while (current->_next != lastPtr) {
+            if (strcmp(current->_data, current->_next->_data) > 0) {
+                // Swap data of nodes if they're in the wrong lexicographical order
+                char *temp = current->_data;
+                current->_data = current->_next->_data;
+                current->_next->_data = temp;
+
+                swapped = 1;
+            }
+            current = current->_next;
+        }
+
+        lastPtr = current;
+    }
+    while (swapped);
+}
+
+int StrList_isSorted(StrList* StrList){
+    int isSorted;
+    struct _StrList *clonedList;
+    clonedList = StrList_clone(StrList);
+    StrList_sort(clonedList);
+    isSorted = StrList_isEqual(StrList,clonedList);
+    StrList_free(clonedList);
+    free(clonedList);
+    return isSorted;
+}

@@ -7,24 +7,23 @@ CFLAGS := -Wall -g -I.
 # Specify all targets
 .PHONY: all clean
 
-all: main
+all: StrList
 
 # Main target: depends on main.o and the static library
-main: main.o libstrlist.a
-	$(CC) $(CFLAGS) -o $@ $< -L. -lstrlist
+StrList: Main.o libStrList.a
+	$(CC) $(CFLAGS) -o $@ $< -L. -lStrList
 
-# Compile main.c to main.o
-main.o: main.c
+# Compile Main.c to Main.o
+Main.o: Main.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Create static library from StrList.o
-libstrlist.a: StrList.o
+libStrList.a: StrList.o
 	ar rcs $@ $<
 
 # Compile StrList.c to StrList.o
 StrList.o: StrList.c StrList.h
 	$(CC) $(CFLAGS) -c $< -o $@
-
 
 # Clean up build artifacts
 clean:
