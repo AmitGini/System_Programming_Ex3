@@ -274,28 +274,31 @@ void StrList_remove(StrList* StrList, const char* data){
 
 void StrList_removeAt(StrList* StrList, int index){
     if(StrList == NULL) return;
-
-    size_t sizeStrList = StrList -> _size;
-    if (index < 0 || index >= sizeStrList) return;
+    if(index < 0 || index >= StrList -> _size) return;
 
     Node* ptrNode = StrList -> _head;
+
+    if(index == 0){
+        StrList->_head = ptrNode->_next;
+        free_Node(ptrNode);
+        return;
+    }
+
     Node* ptrPrevNode = NULL;
     int nodeAtIndex = 0;
 
     while(nodeAtIndex != index) {
-        if (ptrNode == NULL) return;
+        if(ptrNode == NULL) return;
         ptrPrevNode = ptrNode;
         ptrNode = ptrNode->_next;
         nodeAtIndex++;
     }
 
-    if (index == 0) StrList->_head = ptrNode->_next;
-    StrList->_size--;
     if(ptrPrevNode == NULL ) return;
 
     ptrPrevNode->_next = ptrNode->_next;
+    StrList->_size--;
     free_Node(ptrNode);
-
 }
 
 int StrList_isEqual(const StrList* StrList1, const StrList* StrList2){
@@ -350,12 +353,19 @@ StrList* StrList_clone(const StrList* StrList){
 
 void StrList_reverse( StrList* StrList){
     if(StrList == NULL) return;
-    size_t sizeList = StrList->_size;
-    if(sizeList < 1) return;
-    for(int i = 0; i < sizeList; i++){
-        StrList_insertAt(StrList,StrList->_head->_data,sizeList-i);
-        StrList_removeAt(StrList,0);
+    if(StrList->_size < 2) return;
+
+    Node *pCurr = StrList->_head;
+    Node *pPrev = NULL;
+    Node *pNext = NULL;
+
+    while(pCurr){
+        pNext = pCurr->_next;
+        pCurr->_next = pPrev;
+        pPrev = pCurr;
+        pCurr = pNext;
     }
+    StrList->_head = pPrev;
 }
 
 void StrList_sort( StrList* StrList){
@@ -391,11 +401,17 @@ void StrList_sort( StrList* StrList){
 }
 
 int StrList_isSorted(StrList* StrList){
-    int isSorted;
-    struct _StrList *clonedList;
-    clonedList = StrList_clone(StrList);
-    StrList_sort(clonedList);
-    isSorted = StrList_isEqual(StrList,clonedList);
-    StrList_free(clonedList);
-    return isSorted;
+    if(StrList == NULL || StrList->_head == NULL || StrList->_head->_next == NULL) {
+        return TRUE;
+    }
+
+    Node* tempNode = StrList->_head;
+    while(tempNode->_next != NULL){
+        // strcmp return the int value of two strings, if positive first string in the function is bigger then the second
+        // then return false, since it's not sorted
+        if(strcmp(tempNode->_data,tempNode->_next->_data) > 0) return FALSE;
+        tempNode = tempNode->_next;
+    }
+
+    return TRUE;
 }

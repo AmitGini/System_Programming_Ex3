@@ -31,7 +31,7 @@ int main(){
     }
 
     int operation = DEFAULT_STATE; // initial state
-    int numOfWords = DEFAULT_STATE;
+    int integerInput = DEFAULT_STATE;
     char* word = NULL;
 
     while(operation != EXIT) {
@@ -40,18 +40,20 @@ int main(){
         switch (operation) {
 
             case INSERT_LAST:  // 1 insert number of words and then the words to insert in the last position
-                numOfWords = readIntegerInput();
-                while(numOfWords > 0){
+                integerInput = readIntegerInput();
+                // todo: user entered 5 insertion but inserted only 3 - unexpected output
+                while(integerInput > 0){
                     word = readWordInput();
                     StrList_insertLast(myList ,word);
                     free(word);
-                    numOfWords--;
+                    integerInput--;
                 }
                 break;
 
             case INSERT_AT_INDEX:  // 2 insert word at specific index
+                integerInput = readIntegerInput();
                 word = readWordInput();
-                StrList_insertAt(myList, word, readIntegerInput());
+                StrList_insertAt(myList, word, integerInput);
                 free(word);
                 break;
 
@@ -64,7 +66,8 @@ int main(){
                 break;
 
             case PRINT_WORD_AT_INDEX:  // 5 printing word in a specific index
-                StrList_printAt(myList, readIntegerInput());
+                integerInput = readIntegerInput();
+                StrList_printAt(myList, integerInput);
                 break;
 
             case NUM_CHARS_AT_LIST:  // 6 printing the number of chars in the list
@@ -84,7 +87,8 @@ int main(){
                 break;
 
             case REMOVE_WORD_AT_INDEX: // 9
-                StrList_removeAt(myList, readIntegerInput());
+                integerInput = readIntegerInput();
+                StrList_removeAt(myList, integerInput);
                 break;
 
             case REVERSE_LIST: // 10
@@ -92,8 +96,9 @@ int main(){
                 break;
 
             case DELETE_LIST:  // 11
-                while(StrList_firstData(myList) != NULL)
+                while(StrList_firstData(myList) != NULL){
                     StrList_removeAt(myList, 0);
+                }
                 break;
 
             case SORT_LIST_LEX: // 12
@@ -110,11 +115,11 @@ int main(){
                 break;
 
             default:
-                printf("Invalid Case\n");
+                printf("Invalid input!\n");
         }
     }
 
-    StrList_free(myList); // Cleanup
+    StrList_free(myList); // free all Nodes and data in the myList and the list itself
     return EXIT;
 }
 
@@ -142,7 +147,7 @@ char* readWordInput() {
     char ch;
     int len = 0, capacity = 1;
 
-    while ((ch = getchar()) && ch != '\n'&& ch != ' ' && ch != EOF) {
+    while ((ch = getchar()) && ch != '\n' && ch != ' ' && ch != EOF) {
         // Expand buffer if needed
         if (len + 1 >= capacity) {
             capacity *= 2;
@@ -157,6 +162,5 @@ char* readWordInput() {
         word[len++] = ch;
     }
     word[len] = '\0'; // Null-terminate the word
-
     return word;
 }
